@@ -2,6 +2,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Map;
 
@@ -14,7 +15,13 @@ public class App {
 
     public static void main(String[] args) {
         Connection c = getDatabase(getDB_URL());
-        System.out.println("Connected to database");
+        if (c != null)
+            System.out.println("Connected to database");
+        else {
+            System.out.println("Failed to connect to database");
+            System.exit(-2);
+        }
+
     }
 
     private static String getDB_URL() {
@@ -44,8 +51,9 @@ public class App {
             URI dbUri = new URI(db_url);
             String username = dbUri.getUserInfo().split(":")[0];
             String password = dbUri.getUserInfo().split(":")[1];
-            String dbUrl = "jdbc:postgresql://" + dbUri.getHost() + ':' + dbUri.getPort() + dbUri.getPath()
-                    + "?sslmode=require";
+            String dbUrl = "jdbc:postgresql://" + dbUri.getHost() + ':' + dbUri.getPort() + dbUri.getPath();
+            if (dbUrl.charAt(dbUrl.length() - 1) != '/')
+                dbUrl += '/';
             Connection conn = DriverManager.getConnection(dbUrl, username, password);
             if (conn == null) {
                 System.err.println("Error: DriverManager.getConnection() returned a null object");
